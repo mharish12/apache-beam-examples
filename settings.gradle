@@ -1,0 +1,3 @@
+rootProject.name='apache-beam-examples'
+include 'streaming-examples'
+

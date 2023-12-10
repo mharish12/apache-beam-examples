@@ -1,0 +1,52 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.h12'
+version = '0.0.1-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation group: 'org.apache.beam', name: 'beam-sdks-java-core', version: '2.52.0'
+    implementation group: 'org.apache.beam', name: 'beam-sdks-java-io-kafka', version: '2.52.0'
+
+    implementation group: 'org.apache.spark', name: 'spark-core_2.13', version: '3.5.0'
+    compileOnly group: 'org.apache.spark', name: 'spark-streaming_2.13', version: '3.5.0'
+
+    implementation 'org.apache.beam:beam-sdks-java-core:2.52.0'
+    implementation 'org.apache.beam:beam-runners-spark:2.52.0'
+
+    implementation 'org.apache.beam:beam-runners-spark-structured-streaming:2.52.0'
+    implementation 'org.apache.kafka:kafka-clients:3.6.1'  // Kafka client dependency
+
+    implementation group: 'org.apache.beam', name: 'beam-runners-spark-3', version: '2.52.0'
+    implementation group: 'org.apache.beam', name: 'beam-runners-direct-java', version: '2.52.0'
+
+    implementation 'org.slf4j:slf4j-api:2.0.9'  // SLF4J API dependency
+    implementation 'org.slf4j:slf4j-simple:2.0.9'  // Simple SLF4J binding for logging
+
+    testImplementation platform('org.junit:junit-bom:5.9.1')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+jar {
+    archiveBaseName = 'pipeline'
+    destinationDirectory = file('build')
+    manifest {
+        attributes 'Main-Class': 'com.h12.beam.streaming.PipelineMain'
+    }
+    exclude 'META-INF/*.SF'
+    exclude 'META-INF/*.DSA'
+    exclude 'META-INF/*.RSA'
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}

@@ -1,0 +1,116 @@
+
+buildscript {
+    ext {
+        springBootVersion = "3.1.4"
+        springFrameworkVersion = "6.0.12"
+        apacheCommonLangVersion = "3.0"
+        apacheCommonCollectionVersion = "4.0"
+        apacheCommonCsvVersion = "1.8"
+        apacheCommonValidatorVersion = "1.6"
+        mockitoVersion = "4.2.0"
+        testNgVersion = "7.1.0"
+        springRetryVersion = "1.2.5.RELEASE"
+        echoVersion = "1.5.6"
+        powermockVersion = "2.0.7"
+        sonarQubeVarsion = "2.6.2"
+        junitVersion = "5.8.1"
+    }
+
+    repositories {
+        mavenCentral()
+        mavenLocal()
+        maven {
+            url 'https://plugins.gradle.org/m2/'
+        }
+    }
+
+}
+
+plugins {
+    id 'java'
+    id 'jacoco'
+    id 'java-library'
+}
+
+jacoco {
+    toolVersion = "0.8.5"
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    maven {
+        url 'https://plugins.gradle.org/m2/'
+    }
+}
+
+allprojects {
+    group = 'com.h12.ecommerce'
+    apply plugin: "jacoco"
+
+    repositories {
+        mavenCentral()
+        mavenLocal()
+
+        maven {
+            url 'https://plugins.gradle.org/m2/'
+        }
+    }
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'java-library'
+
+    dependencies {
+
+    }
+
+
+    configurations {
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
+        implementation {
+            exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+        }
+
+    }
+
+    test {
+        useJUnitPlatform()
+        //forkEvery = 1
+        // Use TestNG for unit tests
+        useTestNG {
+            options ->
+                options.parallel = 'tests'
+                options.threadCount = 3
+        }
+
+        failFast = false
+    }
+
+    tasks.withType(Test).configureEach {
+        maxParallelForks = 4
+    }
+
+    test.finalizedBy jacocoTestReport
+    jacocoTestReport.dependsOn test
+    check.dependsOn jacocoTestCoverageVerification
+}
+
+tasks.register('jacocoReport', JacocoReport) {
+    for (p in allprojects) {
+        def testTask = p.tasks.named("test")
+        if (testTask != null)
+            dependsOn(testTask)
+
+        executionData.setFrom(file("${p.buildDir}/jacoco/test.exec"))
+        classDirectories.from(file("${p.buildDir}/classes/java/main"))
+    }
+}
