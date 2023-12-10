@@ -35,7 +35,8 @@ public class PipelineMain {
                 .withTopics(Arrays.asList(topic))
                 .updateConsumerProperties(ImmutableMap.of("group.id", "my-group-id"))
                 .withKeyDeserializer(StringDeserializer.class)
-                .withValueDeserializer(StringDeserializer.class);
+                .withValueDeserializer(StringDeserializer.class)
+                .commitOffsetsInFinalize();
 
         // KafkaIO.Read to consume messages from Kafka
         pipeline.apply("ReadFromKafka", read)
